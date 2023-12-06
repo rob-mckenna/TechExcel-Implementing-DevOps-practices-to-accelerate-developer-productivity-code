@@ -5,6 +5,7 @@ env:
   repositoryName: techboost/dotnetcoreapp
   dockerFolderPath: ./Application/src/RazorPagesTestSample
   tag: ${{github.run_number}}
+  appPrefix: ${{ secrets.APP_PREFIX }}
 
 on:
   push:
@@ -66,7 +67,7 @@ jobs:
     needs: dockerBuildPush
     environment:
       name: dev
-      url: https://${{ secrets.APP_PREFIX }}-dev.azurewebsites.net/
+      url: https://$appPrefix-dev.azurewebsites.net/
     
     steps:
       - name: 'Login via Azure CLI'
@@ -76,7 +77,7 @@ jobs:
 
       - uses: azure/webapps-deploy@v2
         with:
-          app-name: '${{ secrets.APP_PREFIX }}-dev'
+          app-name: 'appPrefix-dev'
           images: ${{ secrets.ACR_NAME }}.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
 
   deploy-to-test:
@@ -85,7 +86,7 @@ jobs:
     needs: deploy-to-dev
     environment:
       name: test
-      url: https://${{ secrets.APP_PREFIX }}-test.azurewebsites.net/
+      url: https://$appPrefix-test.azurewebsites.net/
     
     steps:
     - uses: actions/checkout@v3
@@ -97,7 +98,7 @@ jobs:
 
     - uses: azure/webapps-deploy@v2
       with:
-        app-name: '${{ secrets.APP_PREFIX }}-test'
+        app-name: '$appPrefix-test'
         images: ${{ secrets.ACR_NAME }}.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
 
   deploy-to-prod:
@@ -106,7 +107,7 @@ jobs:
     needs: deploy-to-test
     environment:
       name: prod
-      url: https://${{ secrets.APP_PREFIX }}-prod.azurewebsites.net/
+      url: 'https://$appPrefix-prod.azurewebsites.net/'
     
     steps:
     - uses: actions/checkout@v3
@@ -118,5 +119,5 @@ jobs:
 
     - uses: azure/webapps-deploy@v2
       with:
-        app-name: '${{ secrets.APP_PREFIX }}-prod'
+        app-name: '$appPrefix-prod'
         images: ${{ secrets.ACR_NAME }}.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
